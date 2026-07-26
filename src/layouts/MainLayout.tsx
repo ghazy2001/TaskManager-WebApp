@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FolderKanban, Calendar, Settings, X, Zap, Bell, Search } from 'lucide-react';
+import { FolderKanban, Calendar, Settings, X, Zap, Bell, Search, Menu } from 'lucide-react';
 
 export const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,40 +16,18 @@ export const MainLayout: React.FC = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="app-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      {/* Mobile Sidebar Toggle Overlay */}
+    <div className="app-container">
+      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
+          className="sidebar-overlay"
           onClick={toggleSidebar}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.2)',
-            zIndex: 40,
-            backdropFilter: 'blur(4px)',
-          }}
+          aria-label="Close sidebar overlay"
         />
       )}
 
       {/* Sidebar */}
-      <aside
-        className="glass-panel"
-        style={{
-          width: '260px',
-          position: 'fixed',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          borderRight: '1px solid var(--border)',
-          background: 'var(--bg-secondary)',
-          transform: isSidebarOpen ? 'translateX(0)' : 'translateX(0)',
-          transition: 'transform var(--transition-normal)',
-          // Simple responsive mock via transform for mobile handled inline
-        }}
-      >
+      <aside className={`sidebar glass-panel ${isSidebarOpen ? 'open' : ''}`}>
         {/* Sidebar Header */}
         <div
           style={{
@@ -57,7 +35,7 @@ export const MainLayout: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 24px',
+            padding: '0 20px',
             borderBottom: '1px solid var(--border)',
           }}
         >
@@ -82,10 +60,11 @@ export const MainLayout: React.FC = () => {
           </div>
           <button
             onClick={toggleSidebar}
-            className="btn btn-secondary btn-icon"
-            style={{ display: 'none', border: 'none', background: 'transparent' }}
+            className="sidebar-close-btn btn btn-secondary btn-icon"
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+            aria-label="Close menu"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -97,6 +76,7 @@ export const MainLayout: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => setIsSidebarOpen(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -120,7 +100,10 @@ export const MainLayout: React.FC = () => {
         {/* Sidebar Footer with + New Project Button */}
         <div style={{ padding: '24px 16px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <button
-            onClick={() => navigate('/projects?new=true')}
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate('/projects?new=true');
+            }}
             className="btn btn-primary"
             style={{
               width: '100%',
@@ -141,54 +124,52 @@ export const MainLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div
-        className="main-content"
-        style={{
-          marginLeft: '260px',
-          width: 'calc(100% - 260px)',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div className="main-content">
         {/* Header */}
-        <header
-          className="glass-panel"
-          style={{
-            height: '70px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 32px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 30,
-            borderBottom: '1px solid var(--border)',
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          {/* Search bar inside header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f1f5f9', padding: '8px 16px', borderRadius: 'var(--radius-full)', width: '300px' }}>
-            <Search size={16} style={{ color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '100%', color: 'var(--text-primary)' }}
-            />
+        <header className="app-header glass-panel">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Hamburger button for mobile screens */}
+            <button
+              onClick={toggleSidebar}
+              className="mobile-nav-toggle"
+              aria-label="Toggle navigation menu"
+            >
+              <Menu size={24} />
+            </button>
+
+            {/* Search bar inside header */}
+            <div
+              className="search-container"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: '#f1f5f9',
+                padding: '8px 14px',
+                borderRadius: 'var(--radius-full)',
+                width: '300px',
+              }}
+            >
+              <Search size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '100%', color: 'var(--text-primary)' }}
+              />
+            </div>
           </div>
 
           {/* User profile & notifications */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <button style={{ border: 'none', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button style={{ border: 'none', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}>
               <Bell size={20} />
               <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '6px', height: '6px', background: 'var(--danger)', borderRadius: '50%' }} />
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid var(--border)', paddingLeft: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderLeft: '1px solid var(--border)', paddingLeft: '14px' }}>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
                   background: 'var(--primary-glow)',
                   border: '1px solid var(--primary)',
@@ -197,18 +178,19 @@ export const MainLayout: React.FC = () => {
                   justifyContent: 'center',
                   fontWeight: 600,
                   color: 'var(--primary)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
+                  flexShrink: 0,
                 }}
               >
                 JD
               </div>
-              <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>John Doe</span>
+              <span className="user-name" style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>John Doe</span>
             </div>
           </div>
         </header>
 
         {/* Content Outlet */}
-        <main style={{ flex: 1, padding: '32px 40px', overflowY: 'auto' }}>
+        <main className="main-layout-body">
           <div className="fade-in">
             <Outlet />
           </div>
@@ -218,3 +200,4 @@ export const MainLayout: React.FC = () => {
   );
 };
 export default MainLayout;
+

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Plus, X, Loader2, Sparkles, FolderKanban, Pencil, Trash2 } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
@@ -156,8 +157,8 @@ export const ProjectList: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px', flexShrink: 0 }}>
           Filter By:
         </span>
         {(['All', 'Active', 'Completed'] as const).map((filter) => {
@@ -175,6 +176,8 @@ export const ProjectList: React.FC = () => {
                 background: isActive ? 'var(--primary)' : 'transparent',
                 color: isActive ? 'white' : 'var(--text-secondary)',
                 transition: 'all var(--transition-fast)',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {filter === 'Active' ? 'In Progress' : filter}
@@ -227,10 +230,10 @@ export const ProjectList: React.FC = () => {
               Project Cards
             </h3>
             <div
-              className="fade-in"
+              className="projects-grid fade-in"
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                 gap: '24px',
               }}
             >
@@ -246,7 +249,7 @@ export const ProjectList: React.FC = () => {
           </div>
 
           {/* 2. Projects Rows Table */}
-          <div className="glass-panel fade-in" style={{ padding: '32px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+          <div className="glass-panel fade-in" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Project Inventory List</h3>
@@ -421,7 +424,7 @@ export const ProjectList: React.FC = () => {
       )}
 
       {/* Add / Edit Project Modal Overlay */}
-      {(showAddModal || !!editingProject) && (
+      {(showAddModal || !!editingProject) && createPortal(
         <div className="modal-overlay" onClick={handleCloseModals}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
@@ -541,7 +544,8 @@ export const ProjectList: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

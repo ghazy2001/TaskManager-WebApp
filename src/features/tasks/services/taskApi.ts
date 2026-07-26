@@ -1,9 +1,9 @@
-import type { Task, CreateTaskDto, UpdateTaskDto } from '../types/task.types';
+import axiosInstance from '../../../config/axiosInstance';
+import type { Task, CreateTaskDto, UpdateTaskDto, TaskPriority, TaskStatus } from '../types/task.types';
 
 const STORAGE_KEY = 'taskflow_tasks';
 
 const INITIAL_TASKS: Task[] = [
-  // Neo-Tech Branding Identity (proj-1)
   {
     id: 'task-1',
     title: 'Primary Color Palette Design',
@@ -34,8 +34,6 @@ const INITIAL_TASKS: Task[] = [
     projectId: 'proj-1',
     createdAt: new Date().toISOString(),
   },
-  
-  // Smart Delivery App (proj-2)
   {
     id: 'task-4',
     title: 'User Persona Mapping',
@@ -66,8 +64,6 @@ const INITIAL_TASKS: Task[] = [
     projectId: 'proj-2',
     createdAt: new Date().toISOString(),
   },
-
-  // SEO Optimization Campaign (proj-3)
   {
     id: 'task-7',
     title: 'Keyword Research & Strategy',
@@ -90,8 +86,6 @@ const INITIAL_TASKS: Task[] = [
   }
 ];
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const getStoredTasks = (): Task[] => {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) {
@@ -105,23 +99,77 @@ const saveTasks = (tasks: Task[]) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 };
 
+const normalizePriority = (p: any): TaskPriority => {
+  if (p === 0 || p === 'Low' || p === 'low') return 'Low';
+  if (p === 1 || p === 'Medium' || p === 'medium') return 'Medium';
+  if (p === 2 || p === 'High' || p === 'high') return 'High';
+  return 'Medium';
+};
+
+const normalizeStatus = (s: any): TaskStatus => {
+  if (s === 0 || s === 'Todo' || s === 'todo') return 'Todo';
+  if (s === 1 || s === 'InProgress' || s === 'inprogress' || s === 'In Progress') return 'InProgress';
+  if (s === 2 || s === 'Done' || s === 'done' || s === 'Completed') return 'Done';
+  return 'Todo';
+};
+
+const normalizeTask = (t: any, defaultProjectId?: string): Task => {
+  return {
+    id: String(t.id || t.taskId || t.Id || `task-${Date.now()}`),
+    title: t.title || t.Title || t.name || t.Name || 'Untitled Task',
+    description: t.description || t.Description || '',
+    priority: normalizePriority(t.priority || t.Priority),
+    status: normalizeStatus(t.status || t.Status),
+    dueDate: t.dueDate || t.DueDate,
+    projectId: String(t.projectId || t.ProjectId || defaultProjectId || ''),
+    createdAt: t.createdAt || t.CreatedAt || new Date().toISOString(),
+  };
+};
+
 export const taskApi = {
   getByProjectId: async (projectId: string): Promise<Task[]> => {
-    await delay(300);
+    try {
+      // Try GET /Tasks?projectId=... or GET /Projects/{projectId}/tasks
+      let response;
+      try {
+        response = await axiosInstance.get(`/Tasks`, { params: { projectId } });
+      } catch {
+        response = await axiosInstance.get(`/Projects/${projectId}/tasks`);
+      }
+      if (Array.isArray(response.data)) {
+        return response.data.map(t => normalizeTask(t, projectId));
+      }
+    } catch (error) {
+      console.warn(`Backend /Tasks API endpoint for project ${projectId} not reachable yet, using fallback client:`, error);
+    }
     const tasks = getStoredTasks();
-    return tasks.filter(t => t.projectId === projectId);
+    return tasks.filter(t => String(t.projectId) === String(projectId));
   },
 
   getById: async (id: string): Promise<Task> => {
-    await delay(200);
+    try {
+      const response = await axiosInstance.get(`/Tasks/${id}`);
+      if (response.data) {
+        return normalizeTask(response.data);
+      }
+    } catch (error) {
+      console.warn(`Backend /Tasks/${id} API endpoint not reachable yet, using fallback client:`, error);
+    }
     const tasks = getStoredTasks();
-    const task = tasks.find(t => t.id === id);
+    const task = tasks.find(t => String(t.id) === String(id));
     if (!task) throw new Error('Task not found');
     return task;
   },
 
   create: async (data: CreateTaskDto): Promise<Task> => {
-    await delay(400);
+    try {
+      const response = await axiosInstance.post('/Tasks', data);
+      if (response.data) {
+        return normalizeTask(response.data, data.projectId);
+      }
+    } catch (error) {
+      console.warn('Backend POST /Tasks API endpoint not reachable yet, saving locally:', error);
+    }
     const tasks = getStoredTasks();
     const newTask: Task = {
       id: `task-${Date.now()}`,
@@ -135,15 +183,20 @@ export const taskApi = {
     };
     tasks.push(newTask);
     saveTasks(tasks);
-    
-    // Invalidate project list cache counts by updating dummy project timestamp (optional trigger)
     return newTask;
   },
 
   update: async (id: string, data: UpdateTaskDto): Promise<Task> => {
-    await delay(300);
+    try {
+      const response = await axiosInstance.put(`/Tasks/${id}`, { id, ...data });
+      if (response.data) {
+        return normalizeTask(response.data);
+      }
+    } catch (error) {
+      console.warn(`Backend PUT /Tasks/${id} API endpoint not reachable yet, updating locally:`, error);
+    }
     const tasks = getStoredTasks();
-    const index = tasks.findIndex(t => t.id === id);
+    const index = tasks.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error('Task not found');
     
     tasks[index] = {
@@ -155,9 +208,13 @@ export const taskApi = {
   },
 
   delete: async (id: string): Promise<void> => {
-    await delay(300);
+    try {
+      await axiosInstance.delete(`/Tasks/${id}`);
+    } catch (error) {
+      console.warn(`Backend DELETE /Tasks/${id} API endpoint not reachable yet, deleting locally:`, error);
+    }
     let tasks = getStoredTasks();
-    tasks = tasks.filter(t => t.id !== id);
+    tasks = tasks.filter(t => String(t.id) !== String(id));
     saveTasks(tasks);
   },
 };

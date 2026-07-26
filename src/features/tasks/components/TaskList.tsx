@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Loader2, ClipboardList, X, Pencil, Trash2 } from 'lucide-react';
 import { useProjectDetails } from '../../projects/hooks/useProjectDetails';
@@ -552,7 +553,7 @@ export const TaskList: React.FC = () => {
       )}
 
       {/* Add Task Modal */}
-      {isAddModalOpen && (
+      {isAddModalOpen && createPortal(
         <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div
@@ -580,11 +581,12 @@ export const TaskList: React.FC = () => {
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit Task Modal */}
-      {editingTask && (
+      {editingTask && createPortal(
         <div className="modal-overlay" onClick={() => setEditingTask(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div
@@ -613,7 +615,8 @@ export const TaskList: React.FC = () => {
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
