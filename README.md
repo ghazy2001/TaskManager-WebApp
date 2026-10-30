@@ -1,32 +1,52 @@
-# React + TypeScript + Vite
+# 📋 TaskManager WebApp
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A modern, responsive Task & Project Management web application built with **React**, **TypeScript**, and **Vite**.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 📁 **Project Management**: Organize tasks into structured projects with dedicated project views.
+- ✅ **Task Tracking**: Create, update, toggle completion status, and organize tasks efficiently.
+- ⚡ **Optimistic Updates & Custom Hooks**: Modular state architecture using custom React hooks (`useProjects`, `useTaskMutations`, `useProjectDetails`).
+- 🎨 **Clean UI & Responsive Layout**: Clean modular design with reusable components and full layout support.
+- 🔒 **Type-Safe API Layer**: Axios instance abstraction with complete TypeScript types for projects and tasks.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 18 / Vite
+- **Language**: TypeScript
+- **State & Networking**: Custom React Hooks + Axios
+- **Linting & Code Quality**: Oxlint
 
-## Expanding the Oxlint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Prerequisites
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ghazy2001/TaskManager-WebApp.git
+   cd TaskManager-WebApp
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## 📄 License
+
+This project is open source and available under the MIT License.
