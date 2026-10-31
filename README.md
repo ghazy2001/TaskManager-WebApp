@@ -50,3 +50,7 @@ A modern, responsive Task & Project Management web application built with **Reac
 ## 📄 License
 
 This project is open source and available under the MIT License.
+
+## 👤 Author
+
+- **Mahmoud Ghazy** - [@ghazy2001](https://github.com/ghazy2001)
